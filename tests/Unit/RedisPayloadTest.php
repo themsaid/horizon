@@ -121,6 +121,17 @@ class RedisPayloadTest extends UnitTest
         $this->assertEquals([FakeModel::class.':21'], $JobPayload->decoded['tags']);
     }
 
+    public function test_tags_are_added_to_existing()
+    {
+        $JobPayload = new JobPayload(json_encode(['id' => 1, 'tags' => ['mytag']]));
+
+        $job = new CallQueuedListener(FakeListenerWithProperties::class, 'handle', [new FakeEventWithModel(42)]);
+
+        $JobPayload->prepare($job);
+
+        $this->assertEquals(['mytag', FakeModel::class.':42'], $JobPayload->decoded['tags']);
+    }
+
     public function test_listener_and_event_tags_can_merge_auto_tag_events()
     {
         $JobPayload = new JobPayload(json_encode(['id' => 1]));
